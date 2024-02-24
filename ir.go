@@ -30,23 +30,15 @@ func Command(times []time.Duration) (addr, cmd uint8, err error) {
 	}
 
 	for i, d := range times {
-		if closeTo(d, start) && i < len(times)-2 && closeTo(times[i+1], startSpace) {
+		if closeTo(d, start) && len(times)-i >= PayloadSize && closeTo(times[i+1], startSpace) && closeTo(times[64], bitStart) {
 			return command(times[i+2:])
 		}
 	}
 
-	return 0, 0, fmt.Errorf("unable to find beginning of a valid command")
+	return 0, 0, fmt.Errorf("unable to find a valid command")
 }
 
 func command(times []time.Duration) (uint8, uint8, error) {
-	if len(times) < PayloadSize-2 {
-		return 0, 0, fmt.Errorf("not enough data, must have a length of at least 67")
-	}
-
-	if !closeTo(times[64], bitStart) {
-		return 0, 0, fmt.Errorf("packet doesn't end with a final 562.5µs pulse burst")
-	}
-
 	n, err := parse("addr", times)
 	if err != nil {
 		return 0, 0, err
