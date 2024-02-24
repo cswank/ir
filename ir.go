@@ -38,30 +38,24 @@ func Command(times []time.Duration) (addr, cmd uint8, err error) {
 	return 0, 0, fmt.Errorf("unable to find beginning of a valid command")
 }
 
-func command(times []time.Duration) (addr, cmd uint8, err error) {
+func command(times []time.Duration) (uint8, uint8, error) {
 	if len(times) < PayloadSize-2 {
 		return 0, 0, fmt.Errorf("not enough data, must have a length of at least 67")
 	}
 
-	addr, err = parse("addr", times, 0)
+	if !closeTo(times[64], bitStart) {
+		return 0, 0, fmt.Errorf("packet doesn't end with a final 562.5µs pulse burst")
+	}
+
+	n, err := parse("addr", times)
 	if err != nil {
 		return 0, 0, err
 	}
 
-	iAddr, err := parse("iAddr", times, 16)
-	if err != nil {
-		return 0, 0, err
-	}
-
-	cmd, err = parse("cmd", times, 32)
-	if err != nil {
-		return 0, 0, err
-	}
-
-	iCmd, err := parse("iCmd", times, 48)
-	if err != nil {
-		return 0, 0, err
-	}
+	addr := uint8(n)
+	iAddr := uint8(n >> 8)
+	cmd := uint8(n >> 16)
+	iCmd := uint8(n >> 24)
 
 	if iAddr != addr^0xff {
 		return 0, 0, fmt.Errorf("invalid address %d, inverse %d", addr, iAddr)
@@ -74,22 +68,20 @@ func command(times []time.Duration) (addr, cmd uint8, err error) {
 	return addr, cmd, nil
 }
 
-func parse(typ string, times []time.Duration, start int) (val uint8, err error) {
-	var mask uint8
-	for i, d := range times[start : start+16] {
+func parse(typ string, times []time.Duration) (val uint32, err error) {
+	for i, d := range times[:64] {
 		if i%2 == 0 {
 			if !closeTo(d, bitStart) {
 				return 0, fmt.Errorf("invalid %s", typ)
 			}
 		} else {
 			if closeTo(d, bitStart) {
-				mask = 0
+				// nothing to do, this bit is already zero
 			} else if closeTo(d, bitOne) {
-				mask = 1 << (i / 2)
+				val ^= (1 << (i / 2))
 			} else {
 				return 0, fmt.Errorf("invalid %s", typ)
 			}
-			val ^= mask
 		}
 	}
 
