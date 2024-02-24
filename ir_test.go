@@ -21,3 +21,9 @@ func TestIR(t *testing.T) {
 	assert.Equal(t, uint8(0x35), addr)
 	assert.Equal(t, uint8(0x40), cmd)
 }
+
+func BenchmarkIR(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		ir.Command(t1)
+	}
+}
