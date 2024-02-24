@@ -43,22 +43,22 @@ func command(times []time.Duration) (addr, cmd uint8, err error) {
 		return 0, 0, fmt.Errorf("not enough data, must have a length of at least 67")
 	}
 
-	addr, err = parse("addr", times)
+	addr, err = parse("addr", times, 0)
 	if err != nil {
 		return 0, 0, err
 	}
 
-	iAddr, err := parse("iAddr", times[16:])
+	iAddr, err := parse("iAddr", times, 16)
 	if err != nil {
 		return 0, 0, err
 	}
 
-	cmd, err = parse("cmd", times[32:])
+	cmd, err = parse("cmd", times, 32)
 	if err != nil {
 		return 0, 0, err
 	}
 
-	iCmd, err := parse("iCmd", times[48:])
+	iCmd, err := parse("iCmd", times, 48)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -74,9 +74,9 @@ func command(times []time.Duration) (addr, cmd uint8, err error) {
 	return addr, cmd, nil
 }
 
-func parse(typ string, times []time.Duration) (val uint8, err error) {
+func parse(typ string, times []time.Duration, start int) (val uint8, err error) {
 	var mask uint8
-	for i, d := range times[:16] {
+	for i, d := range times[start : start+16] {
 		if i%2 == 0 {
 			if !closeTo(d, bitStart) {
 				return 0, fmt.Errorf("invalid %s", typ)
@@ -91,7 +91,6 @@ func parse(typ string, times []time.Duration) (val uint8, err error) {
 			}
 			val ^= mask
 		}
-		i++
 	}
 
 	return val, nil
