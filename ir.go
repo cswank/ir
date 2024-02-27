@@ -15,15 +15,6 @@ const (
 	PayloadSize = 67
 )
 
-type (
-	cmd struct {
-		addr  uint8
-		iAddr uint8
-		cmd   uint8
-		iCmd  uint8
-	}
-)
-
 func Command(times []time.Duration) (addr, cmd uint8, err error) {
 	if len(times) < PayloadSize {
 		return 0, 0, fmt.Errorf("not enough data, must have a length of at least 67")
