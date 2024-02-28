@@ -16,12 +16,8 @@ const (
 )
 
 func Command(times []time.Duration) (addr, cmd uint8, err error) {
-	if len(times) < PayloadSize {
-		return 0, 0, fmt.Errorf("not enough data, must have a length of at least 67")
-	}
-
 	for i, d := range times {
-		if closeTo(d, start) && len(times)-i >= PayloadSize && closeTo(times[i+1], startSpace) && closeTo(times[64], bitStart) {
+		if len(times)-i >= PayloadSize && closeTo(d, start) && closeTo(times[i+1], startSpace) && closeTo(times[64], bitStart) {
 			return command(times[i+2:])
 		}
 	}
