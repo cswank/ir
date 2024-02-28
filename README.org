@@ -1,14 +1,15 @@
-* NEC Infrared Transmission Protocol parser
+* NEC Infrared Transmission Protocol Parse
+IR is a library for parsing IR remote control signals.
 
-After collecting IR signal pulses into a slice, like in this tinygo example:
+After collecting IR signal pulses from a remote control into a slice, like in this tinygo example:
 #+begin_src go
   var i int
   var t2 time.Time
   t1 := time.Now()
-  events := make([]time.Duration, 200)
+  pulses := make([]time.Duration, 200)
   irPin.SetInterrupt(machine.PinToggle, func(p machine.Pin) {
       t2 = time.Now()
-      events[i] = t2.Sub(t1)
+      pulses[i] = t2.Sub(t1)
       t1 = t2
       i++
   })
@@ -17,8 +18,7 @@ After collecting IR signal pulses into a slice, like in this tinygo example:
 The address and command from the remote button press can be decoded like:
 
 #+begin_src go
-  addr, cmd, err := ir.Command(events)
-
+  addr, cmd, err := ir.Command(pulses)
   fmt.Println(addr, cmd, err)
 #+end_src
 
