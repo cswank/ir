@@ -60,7 +60,7 @@ func parse(times []time.Duration) (val uint32, err error) {
 		} else if closeTo(d2, bitOne) {
 			val ^= (1 << (i / 2))
 		} else {
-			return 0, fmt.Errorf("invalid pulse %s (index %d), expected %s or %s", d1, i+1, bitStart, bitOne)
+			return 0, fmt.Errorf("invalid pulse %s (index %d), expected %s or %s", d2, i+1, bitStart, bitOne)
 		}
 	}
 
