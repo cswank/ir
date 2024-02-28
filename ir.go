@@ -48,19 +48,19 @@ func command(times []time.Duration) (uint8, uint8, error) {
 }
 
 func parse(times []time.Duration) (val uint32, err error) {
-	for i, d := range times[:64] {
-		if i%2 == 0 {
-			if !closeTo(d, bitStart) {
-				return 0, fmt.Errorf("invalid pulse %s (index %d), expected %s pulse", d, i, bitStart)
-			}
+	var d1, d2 time.Duration
+	for i := 0; i < 64; i += 2 {
+		d1, d2 = times[i], times[i+1]
+		if !closeTo(d1, bitStart) {
+			return 0, fmt.Errorf("invalid pulse %s (index %d), expected %s pulse", d1, i, bitStart)
+		}
+
+		if closeTo(d2, bitStart) {
+			// nothing to do, this bit is already zero
+		} else if closeTo(d2, bitOne) {
+			val ^= (1 << (i / 2))
 		} else {
-			if closeTo(d, bitStart) {
-				// nothing to do, this bit is already zero
-			} else if closeTo(d, bitOne) {
-				val ^= (1 << (i / 2))
-			} else {
-				return 0, fmt.Errorf("invalid pulse %s (index %d), expected %s or %s", d, i, bitStart, bitOne)
-			}
+			return 0, fmt.Errorf("invalid pulse %s (index %d), expected %s or %s", d1, i+1, bitStart, bitOne)
 		}
 	}
 
