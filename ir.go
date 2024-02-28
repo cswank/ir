@@ -26,7 +26,7 @@ func Command(times []time.Duration) (addr, cmd uint8, err error) {
 }
 
 func command(times []time.Duration) (uint8, uint8, error) {
-	n, err := parse("addr", times)
+	n, err := parse(times)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -47,11 +47,11 @@ func command(times []time.Duration) (uint8, uint8, error) {
 	return addr, cmd, nil
 }
 
-func parse(typ string, times []time.Duration) (val uint32, err error) {
+func parse(times []time.Duration) (val uint32, err error) {
 	for i, d := range times[:64] {
 		if i%2 == 0 {
 			if !closeTo(d, bitStart) {
-				return 0, fmt.Errorf("invalid %s", typ)
+				return 0, fmt.Errorf("invalid pulse %s (index %d), expected %s pulse", d, i, bitStart)
 			}
 		} else {
 			if closeTo(d, bitStart) {
@@ -59,7 +59,7 @@ func parse(typ string, times []time.Duration) (val uint32, err error) {
 			} else if closeTo(d, bitOne) {
 				val ^= (1 << (i / 2))
 			} else {
-				return 0, fmt.Errorf("invalid %s", typ)
+				return 0, fmt.Errorf("invalid pulse %s (index %d), not %s or %s", d, i, bitStart, bitOne)
 			}
 		}
 	}
