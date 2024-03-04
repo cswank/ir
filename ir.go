@@ -6,13 +6,16 @@ import (
 )
 
 const (
-	tolerance  = 100 * time.Microsecond
 	start      = 9 * time.Millisecond
 	startSpace = 4500 * time.Microsecond
 	bitStart   = 562500 * time.Nanosecond
 	bitOne     = 1687500 * time.Nanosecond
 
 	PayloadSize = 67
+)
+
+var (
+	Tolerance = 100 * time.Microsecond
 )
 
 func Command(times []time.Duration) (addr, cmd uint8, err error) {
@@ -22,7 +25,7 @@ func Command(times []time.Duration) (addr, cmd uint8, err error) {
 		}
 	}
 
-	return 0, 0, fmt.Errorf("unable to find a valid command")
+	return 0, 0, fmt.Errorf("unable to find a valid command: %+v", times)
 }
 
 func command(times []time.Duration) (uint8, uint8, error) {
@@ -68,5 +71,5 @@ func parse(times []time.Duration) (val uint32, err error) {
 }
 
 func closeTo(d time.Duration, val time.Duration) bool {
-	return d >= val-tolerance && d <= val+tolerance
+	return d >= val-Tolerance && d <= val+Tolerance
 }
