@@ -20,7 +20,7 @@ var (
 
 func Command(times []time.Duration) (addr, cmd uint8, err error) {
 	for i, d := range times {
-		if len(times)-i >= PayloadSize && closeTo(d, start) && closeTo(times[i+1], startSpace) && closeTo(times[64], bitStart) {
+		if len(times)-i >= PayloadSize && closeTo(d, start) && closeTo(times[i+1], startSpace) && closeTo(times[i+66], bitStart) {
 			return command(times[i+2:])
 		}
 	}
