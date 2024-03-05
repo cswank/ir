@@ -6,10 +6,10 @@ import (
 )
 
 const (
-	start      = 9 * time.Millisecond
-	startSpace = 4500 * time.Microsecond
-	bitStart   = 562500 * time.Nanosecond
-	bitOne     = 1687500 * time.Nanosecond
+	start1   = 9 * time.Millisecond
+	start2   = 4500 * time.Microsecond
+	bitStart = 562500 * time.Nanosecond
+	bitOne   = 1687500 * time.Nanosecond
 
 	PayloadSize = 67
 )
@@ -20,7 +20,7 @@ var (
 
 func Command(times []time.Duration) (addr, cmd uint8, err error) {
 	for i, d := range times {
-		if len(times)-i >= PayloadSize && closeTo(d, start) && closeTo(times[i+1], startSpace) && closeTo(times[i+66], bitStart) {
+		if len(times)-i >= PayloadSize && closeTo(d, start1) && closeTo(times[i+1], start2) && closeTo(times[i+66], bitStart) {
 			return command(times[i+2:])
 		}
 	}
