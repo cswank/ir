@@ -1,6 +1,6 @@
-* NEC Infrared Transmission Protocol Parse
+*IR
 IR is a library for parsing IR remote control signals.
-
+** NEC
 After collecting IR signal pulses from a remote control into a slice, like in this tinygo example:
 #+begin_src go
   var i int
@@ -16,10 +16,16 @@ After collecting IR signal pulses from a remote control into a slice, like in th
 #+end_src
 
 The address and command from the remote button press can be decoded like:
-
+*** links
+https://www.sbprojects.net/knowledge/ir/nec.php
 #+begin_src go
   addr, cmd, err := ir.Command(pulses)
   fmt.Println(addr, cmd, err)
 #+end_src
-
-
+** RC5 (TODO)
+*** links
+https://techdocs.altium.com/display/FPGA/Philips+RC5+Infrared+Transmission+Protocol
+** Fujitsu
+*** links
+https://github.com/crankyoldgit/IRremoteESP8266/blob/master/src/ir_Fujitsu.cpp
+https://github.com/albertnis/fujitsu-ar-ry13-ir-codes
