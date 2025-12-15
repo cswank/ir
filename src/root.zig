@@ -4,9 +4,9 @@ const tolerance: u32 = 100;
 
 const frame1: u32 = 9000;
 const frame2: u32 = 4500;
-const bitStart: u32 = 563;
-const bitOne: u32 = 1688;
-const bitMask: u64 = 1;
+const bit_start: u32 = 563;
+const bit_one: u32 = 1688;
+const bit_mask: u64 = 1;
 
 pub const message = struct {
     address: u8,
@@ -38,7 +38,7 @@ pub const IR = struct {
                 }
             },
             state.bit_start => {
-                if (closeTo(duration, bitStart)) {
+                if (closeTo(duration, bit_start)) {
                     self.state = state.bit_end;
                 } else {
                     self.state = state.leader1;
@@ -47,12 +47,12 @@ pub const IR = struct {
                 }
             },
             state.bit_end => {
-                if (closeTo(duration, bitStart)) {
+                if (closeTo(duration, bit_start)) {
                     //this bit is already zero
                     self.i += 1;
                     self.state = state.bit_start;
-                } else if (closeTo(duration, bitOne)) {
-                    self.val |= (bitMask << self.i);
+                } else if (closeTo(duration, bit_one)) {
+                    self.val |= (bit_mask << self.i);
                     self.i += 1;
                     self.state = state.bit_start;
                 } else {
