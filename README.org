@@ -2,7 +2,7 @@
 IR is a library for parsing IR remote control signals.
 ** NEC
 Process the IR signal by calculating the time, in milliseconds, between
-each rising and falling (or falling and rising) edge in the signal.  If
+each rising/falling and falling/rising edge in the signal.  If
 put() returns true, then a full packet has been received.
 #+begin_src go
   var parser = ir.IR{};
