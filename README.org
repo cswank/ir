@@ -1,27 +1,49 @@
 *IR
 IR is a library for parsing IR remote control signals.
 ** NEC
-After collecting IR signal pulses from a remote control into a slice, like in this tinygo example:
+Microzig example
 #+begin_src go
-  var i int
-  var t2 time.Time
-  t1 := time.Now()
-  pulses := make([]time.Duration, 200)
-  irPin.SetInterrupt(machine.PinToggle, func(p machine.Pin) {
-      t2 = time.Now()
-      pulses[i] = t2.Sub(t1)
-      t1 = t2
-      i++
-  })
-#+end_src
+  pub const microzig_options = microzig.Options{
+      .log_level = .debug,
+      .logFn = rp2xxx.uart.log,
+      .interrupts = .{ .IO_IRQ_BANK0 = .{ .c = callback } },
+  };
 
-The address and command from the remote button press can be decoded like:
+  var t1: time.Absolute = undefined;
+  var t2: time.Absolute = undefined;
+  var parser = ir.IR{};
+
+  fn callback() linksection(".ram_text") callconv(.c) void {
+      var iter = gpio.IrqEventIter{};
+      while (iter.next()) |e| {
+          switch (e.pin) {
+              button => {
+                  togglePower();
+              },
+  				ir_input => {
+                  t2 = rptime.get_time_since_boot();
+                  if (parser.put(t2.diff(t1).to_us())) {
+                      checkIR();
+                  }
+                  t1 = t2;
+              },
+  				else => {},
+  			}
+      }
+  }
+
+  fn checkIR() void {
+  	if (parser.value()) |msg| {
+  		if (msg.address == 0x35 and msg.command == 0x40) { // minidsp flex on/off button
+  			// do something
+  		}
+  	} else |_| {
+  		blink(5);
+  	}
+  }
+#+end_src
 *** links
 https://www.sbprojects.net/knowledge/ir/nec.php
-#+begin_src go
-  addr, cmd, err := ir.Command(pulses)
-  fmt.Println(addr, cmd, err)
-#+end_src
 ** RC5 (TODO)
 *** links
 https://techdocs.altium.com/display/FPGA/Philips+RC5+Infrared+Transmission+Protocol
