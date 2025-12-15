@@ -1,45 +1,15 @@
-*IR
+* IR
 IR is a library for parsing IR remote control signals.
 ** NEC
-Microzig example
+Process the IR signal by calculating the time, in milliseconds, between
+each rising and falling (or falling and rising) edge in the signal.  If
+put() returns true, then a full packet has been received.
 #+begin_src go
-  pub const microzig_options = microzig.Options{
-      .log_level = .debug,
-      .logFn = rp2xxx.uart.log,
-      .interrupts = .{ .IO_IRQ_BANK0 = .{ .c = callback } },
-  };
-
-  var t1: time.Absolute = undefined;
-  var t2: time.Absolute = undefined;
   var parser = ir.IR{};
-
-  fn callback() linksection(".ram_text") callconv(.c) void {
-      var iter = gpio.IrqEventIter{};
-      while (iter.next()) |e| {
-          switch (e.pin) {
-              button => {
-                  togglePower();
-              },
-  				ir_input => {
-                  t2 = rptime.get_time_since_boot();
-                  if (parser.put(t2.diff(t1).to_us())) {
-                      checkIR();
-                  }
-                  t1 = t2;
-              },
-  				else => {},
-  			}
-      }
-  }
-
-  fn checkIR() void {
-  	if (parser.value()) |msg| {
-  		if (msg.address == 0x35 and msg.command == 0x40) { // minidsp flex on/off button
-  			// do something
-  		}
-  	} else |_| {
-  		blink(5);
-  	}
+  if (parser.put(t)) {
+  	// a full NEC packet has been received
+  	const msg = try parser.value();
+  	std.log.debug("address: 0x{x}, command: 0x{x}", .{msg.address, msg.command});
   }
 #+end_src
 *** links
