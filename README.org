@@ -2,15 +2,17 @@
 IR is a library for parsing IR remote control signals.
 ** NEC
 Process the IR signal by calculating the time, in milliseconds, between
-each rising/falling and falling/rising edge in the signal.  If
-put() returns true, then a full packet has been received.
+each rising/falling and falling/rising edge in the signal (pulses in the
+example below).  If put() returns true, then a full packet has been received.
 #+begin_src go
   var parser = ir.IR{};
-  if (parser.put(t)) {
-  	// a full NEC packet has been received
-  	const msg = try parser.value();
-  	std.log.debug("address: 0x{x}, command: 0x{x}", .{msg.address, msg.command});
+  for (pulses, 0..) |_, i| {
+  	if (parser.put(pulses[i])) {
+  		break;
+  	}
   }
+  const msg = try parser.value();
+  std.log.debug("address: 0x{x}, command: 0x{x}", .{msg.address, msg.command});
 #+end_src
 *** links
 https://www.sbprojects.net/knowledge/ir/nec.php
