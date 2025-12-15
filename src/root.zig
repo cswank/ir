@@ -13,48 +13,50 @@ pub const message = struct {
     command: u8,
 };
 
+const state = enum { leader1, leader2, bit_start, bit_end };
+
 pub const IR = struct {
     val: u64 = 0,
     i: u6 = 0,
     prev: u64 = 0,
-    state: u2 = 0,
+    state: state = state.leader1,
 
     pub fn put(self: *IR, duration: u64) bool {
         switch (self.state) {
-            0 => {
+            state.leader1 => {
                 if (closeTo(duration, frame1)) {
-                    self.state += 1;
+                    self.state = state.leader2;
                 }
             },
-            1 => {
+            state.leader2 => {
                 if (closeTo(duration, frame2)) {
-                    self.state += 1;
+                    self.state = state.bit_start;
                 } else {
-                    self.state = 0;
+                    self.state = state.leader1;
                     self.i = 0;
                     self.val = 0;
                 }
             },
-            2 => {
+            state.bit_start => {
                 if (closeTo(duration, bitStart)) {
-                    self.state += 1;
+                    self.state = state.bit_end;
                 } else {
-                    self.state = 0;
+                    self.state = state.leader1;
                     self.i = 0;
                     self.val = 0;
                 }
             },
-            3 => {
+            state.bit_end => {
                 if (closeTo(duration, bitStart)) {
                     //this bit is already zero
                     self.i += 1;
-                    self.state = 2;
+                    self.state = state.bit_start;
                 } else if (closeTo(duration, bitOne)) {
                     self.val |= (bitMask << self.i);
                     self.i += 1;
-                    self.state = 2;
+                    self.state = state.bit_start;
                 } else {
-                    self.state = 0;
+                    self.state = state.leader1;
                     self.i = 0;
                     self.val = 0;
                 }
@@ -72,7 +74,7 @@ pub const IR = struct {
 
         self.val = 0;
         self.i = 0;
-        self.state = 0;
+        self.state = state.leader1;
 
         if (addr != ~iaddr) {
             return error.Invalid;
