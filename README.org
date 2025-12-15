@@ -14,12 +14,3 @@ example below).  If put() returns true, then a full packet has been received.
   const msg = try parser.value();
   std.log.debug("address: 0x{x}, command: 0x{x}", .{msg.address, msg.command});
 #+end_src
-*** links
-https://www.sbprojects.net/knowledge/ir/nec.php
-** RC5 (TODO)
-*** links
-https://techdocs.altium.com/display/FPGA/Philips+RC5+Infrared+Transmission+Protocol
-** Fujitsu
-*** links
-https://github.com/crankyoldgit/IRremoteESP8266/blob/master/src/ir_Fujitsu.cpp
-https://github.com/albertnis/fujitsu-ar-ry13-ir-codes
