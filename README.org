@@ -1,6 +1,6 @@
 * IR
-IR is a library for parsing IR remote control signals.
-** NEC
+IR is a library for parsing NEC IR remote control signals.
+
 Process the IR signal by calculating the time, in milliseconds, between
 each rising/falling and falling/rising edge in the signal (pulses in the
 example below).  If put() returns true, then a full packet has been received.
