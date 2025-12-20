@@ -7,7 +7,7 @@ pub const message = struct {
     command: u8,
 };
 
-const frames: []const []const u32 = &.{
+const nec_frames: []const []const u32 = &.{
     &.{9000},
     &.{4500},
     &.{563},
@@ -21,7 +21,7 @@ pub const NEC = struct {
     i: u3 = 0,
 
     pub fn put(self: *NEC, duration: u64) bool {
-        const close = self.closeTo(@truncate(duration), frames[self.i]);
+        const close = self.closeTo(@truncate(duration), nec_frames[self.i]);
 
         if (!close.success) {
             self.reset();
@@ -53,11 +53,11 @@ pub const NEC = struct {
         self.reset();
 
         if (addr != ~iaddr) {
-            return error.Invalid;
+            return error.InvalidAddress;
         }
 
         if (cmd != ~icmd) {
-            return error.Invalid;
+            return error.InvalidCommand;
         }
 
         return message{ .address = addr, .command = cmd };
