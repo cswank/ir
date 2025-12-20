@@ -1,41 +1,45 @@
 const std = @import("std");
 
-const bit_mask: u64 = 1;
+const bit_mask: u32 = 1;
 
 pub const message = struct {
     address: u8,
     command: u8,
 };
 
-const frames: []const []const u64 = &[_][]const u64{
-    &[_]u64{9000},
-    &[_]u64{4500},
-    &[_]u64{563},
-    &[_]u64{ 563, 1688 },
+const frames: []const []const u32 = &[_][]const u32{
+    &[_]u32{9000},
+    &[_]u32{4500},
+    &[_]u32{563},
+    &[_]u32{ 563, 1688 },
 };
 
 pub const NEC = struct {
     tolerance: u32 = 100,
-    val: u64 = 0,
-    i: u6 = 0,
-    j: u3 = 0,
+    val: u32 = 0,
+    bit: u5 = 0,
+    i: u3 = 0,
 
-    pub fn put(self: *NEC, duration: u64) bool {
-        const close = self.closeTo(duration, frames[self.j]);
+    pub fn put(self: *NEC, input: u64) bool {
+        const duration: u32 = @truncate(input);
+        const close = self.closeTo(duration, frames[self.i]);
         if (close.success) {
-            if (self.j == 3) {
+            if (self.i == 3) {
                 if (close.i == 1) {
-                    self.val |= (bit_mask << self.i);
-                    //close.i == 0 (532 milliseconds) means bit should be zero, which it already is
+                    self.val |= (bit_mask << self.bit);
+                    //close.i == 0 (532 milliseconds) means the current bit should be zero, which it already is
                 }
-                self.i += 1;
+                if (self.bit == 31) {
+                    return true;
+                }
+                self.bit += 1;
             }
 
-            self.j += 1;
-            if (self.j == 4) {
-                self.j = 2;
+            self.i += 1;
+            if (self.i == 4) {
+                self.i = 2;
             }
-            return self.i == 32;
+            return false;
         }
 
         self.reset();
@@ -63,11 +67,11 @@ pub const NEC = struct {
 
     fn reset(self: *NEC) void {
         self.val = 0;
+        self.bit = 0;
         self.i = 0;
-        self.j = 0;
     }
 
-    fn closeTo(self: *NEC, d: u64, vals: []const u64) struct { success: bool, i: usize } {
+    fn closeTo(self: *NEC, d: u32, vals: []const u32) struct { success: bool, i: usize } {
         for (vals, 0..) |val, index| {
             if ((d >= (val - self.tolerance)) and (d <= (val + self.tolerance))) {
                 return .{ .success = true, .i = index };
@@ -79,7 +83,8 @@ pub const NEC = struct {
 
 test "usage" {
     //                     [rubbish ] [start of valid signal ..]
-    const pulses = [_]u64{ 33, 39631, 9038, 4481, 579, 1689, 580, 554, 582, 1686, 581, 554, 582, 1686, 580, 1689, 579, 556, 579, 554, 580, 555, 577, 1691, 579, 555, 579, 1689, 580, 554, 580, 555, 579, 1690, 579, 1690, 579, 555, 579, 557, 578, 557, 577, 557, 554, 580, 578, 557, 578, 1689, 579, 556, 579, 1689, 578, 1690, 580, 1689, 578, 1689, 580, 1688, 579, 1690, 577, 558, 577, 1692, 554, 39631 };
+    const pulses = [_]u32{ 33, 39631, 9038, 4481, 579, 1689, 580, 554, 582, 1686, 581, 554, 582, 1686, 580, 1689, 579, 556, 579, 554, 580, 555, 577, 1691, 579, 555, 579, 1689, 580, 554, 580, 555, 579, 1690, 579, 1690, 579, 555, 579, 557, 578, 557, 577, 557, 554, 580, 578, 557, 578, 1689, 579, 556, 579, 1689, 578, 1690, 580, 1689, 578, 1689, 580, 1688, 579, 1690, 577, 558, 577, 1692, 554, 39631 };
+
     var ir = NEC{ .tolerance = 50 };
     for (pulses, 0..) |_, i| {
         if (ir.put(pulses[i])) {
