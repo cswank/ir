@@ -1,7 +1,5 @@
 const std = @import("std");
 
-const bit_mask: u32 = 1;
-
 pub const message = struct {
     address: u8,
     command: u8,
@@ -29,7 +27,7 @@ pub const NEC = struct {
         }
 
         if (self.i == 3) {
-            self.val |= close.i * (bit_mask << self.bit);
+            self.val |= (close.mask << self.bit);
             if (self.bit == 31) {
                 return true;
             }
@@ -69,13 +67,13 @@ pub const NEC = struct {
         self.i = 0;
     }
 
-    fn closeTo(self: *NEC, d: u32, vals: []const u32) struct { success: bool, i: u32 } {
+    fn closeTo(self: *NEC, d: u32, vals: []const u32) struct { success: bool, mask: u32 } {
         for (vals, 0..) |val, index| {
             if ((d >= (val - self.tolerance)) and (d <= (val + self.tolerance))) {
-                return .{ .success = true, .i = @truncate(index) };
+                return .{ .success = true, .mask = @truncate(index) };
             }
         }
-        return .{ .success = false, .i = 0 };
+        return .{ .success = false, .mask = 0 };
     }
 };
 
