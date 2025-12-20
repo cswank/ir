@@ -50,13 +50,8 @@ pub const NEC = struct {
 
         self.reset();
 
-        if (addr != ~iaddr) {
-            return error.InvalidAddress;
-        }
-
-        if (cmd != ~icmd) {
-            return error.InvalidCommand;
-        }
+        if (addr != ~iaddr) return error.InvalidAddress;
+        if (cmd != ~icmd) return error.InvalidCommand;
 
         return message{ .address = addr, .command = cmd };
     }
