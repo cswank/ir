@@ -1,11 +1,6 @@
 const std = @import("std");
 
 const tolerance: u32 = 100;
-
-const frame1: u32 = 9000;
-const frame2: u32 = 4500;
-const bit_start: u32 = 563;
-const bit_one: u32 = 1688;
 const bit_mask: u64 = 1;
 
 pub const message = struct {
@@ -13,54 +8,36 @@ pub const message = struct {
     command: u8,
 };
 
-const state = enum { leader1, leader2, bit_start, bit_end };
+const frames: []const []const u64 = &[_][]const u64{
+    &[_]u64{9000},
+    &[_]u64{4500},
+    &[_]u64{563},
+    &[_]u64{ 563, 1688 },
+};
 
 pub const IR = struct {
     val: u64 = 0,
     i: u6 = 0,
-    prev: u64 = 0,
-    state: state = state.leader1,
+    j: u3 = 0,
 
     pub fn put(self: *IR, duration: u64) bool {
-        switch (self.state) {
-            state.leader1 => {
-                if (closeTo(duration, frame1)) {
-                    self.state = state.leader2;
-                }
-            },
-            state.leader2 => {
-                if (closeTo(duration, frame2)) {
-                    self.state = state.bit_start;
+        const close = closeTo(duration, frames[self.j]);
+        if (close.success) {
+            if (self.j == 3) {
+                if (close.i == 0) {
+                    //this bit is already 0;
                 } else {
-                    self.state = state.leader1;
-                    self.i = 0;
-                    self.val = 0;
-                }
-            },
-            state.bit_start => {
-                if (closeTo(duration, bit_start)) {
-                    self.state = state.bit_end;
-                } else {
-                    self.state = state.leader1;
-                    self.i = 0;
-                    self.val = 0;
-                }
-            },
-            state.bit_end => {
-                if (closeTo(duration, bit_start)) {
-                    //this bit is already zero
-                    self.i += 1;
-                    self.state = state.bit_start;
-                } else if (closeTo(duration, bit_one)) {
                     self.val |= (bit_mask << self.i);
-                    self.i += 1;
-                    self.state = state.bit_start;
-                } else {
-                    self.state = state.leader1;
-                    self.i = 0;
-                    self.val = 0;
                 }
-            },
+                self.i += 1;
+            }
+
+            self.j += 1;
+            if (self.j == 4) {
+                self.j = 2;
+            }
+        } else {
+            self.reset();
         }
 
         return self.i == 32;
@@ -72,9 +49,7 @@ pub const IR = struct {
         const cmd: u8 = @truncate(self.val >> 16);
         const icmd: u8 = @truncate(self.val >> 24);
 
-        self.val = 0;
-        self.i = 0;
-        self.state = state.leader1;
+        self.reset();
 
         if (addr != ~iaddr) {
             return error.Invalid;
@@ -86,10 +61,21 @@ pub const IR = struct {
 
         return message{ .address = addr, .command = cmd };
     }
+
+    fn reset(self: *IR) void {
+        self.val = 0;
+        self.i = 0;
+        self.j = 0;
+    }
 };
 
-fn closeTo(d: u64, val: u64) bool {
-    return (d >= (val - tolerance)) and (d <= (val + tolerance));
+fn closeTo(d: u64, vals: []const u64) struct { success: bool, i: usize } {
+    for (vals, 0..) |val, index| {
+        if ((d >= (val - tolerance)) and (d <= (val + tolerance))) {
+            return .{ .success = true, .i = index };
+        }
+    }
+    return .{ .success = false, .i = 0 };
 }
 
 test "usage" {
