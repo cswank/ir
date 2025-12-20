@@ -7,11 +7,11 @@ pub const message = struct {
     command: u8,
 };
 
-const frames: []const []const u32 = &[_][]const u32{
-    &[_]u32{9000},
-    &[_]u32{4500},
-    &[_]u32{563},
-    &[_]u32{ 563, 1688 },
+const frames: []const []const u32 = &.{
+    &.{9000},
+    &.{4500},
+    &.{563},
+    &.{ 563, 1688 }, //if this pulse is close to 563 the current bit is zero, if close to 1688 the current bit is one.
 };
 
 pub const NEC = struct {
@@ -20,29 +20,27 @@ pub const NEC = struct {
     bit: u5 = 0,
     i: u3 = 0,
 
-    pub fn put(self: *NEC, input: u64) bool {
-        const duration: u32 = @truncate(input);
-        const close = self.closeTo(duration, frames[self.i]);
-        if (close.success) {
-            if (self.i == 3) {
-                if (close.i == 1) {
-                    self.val |= (bit_mask << self.bit);
-                    //close.i == 0 (532 milliseconds) means the current bit should be zero, which it already is
-                }
-                if (self.bit == 31) {
-                    return true;
-                }
-                self.bit += 1;
-            }
+    pub fn put(self: *NEC, duration: u64) bool {
+        const close = self.closeTo(@truncate(duration), frames[self.i]);
 
-            self.i += 1;
-            if (self.i == 4) {
-                self.i = 2;
-            }
+        if (!close.success) {
+            self.reset();
             return false;
         }
 
-        self.reset();
+        if (self.i == 3) {
+            self.val |= close.i * (bit_mask << self.bit);
+            if (self.bit == 31) {
+                return true;
+            }
+            self.bit += 1;
+        }
+
+        self.i += 1;
+        if (self.i == 4) {
+            self.i = 2;
+        }
+
         return false;
     }
 
@@ -71,10 +69,10 @@ pub const NEC = struct {
         self.i = 0;
     }
 
-    fn closeTo(self: *NEC, d: u32, vals: []const u32) struct { success: bool, i: usize } {
+    fn closeTo(self: *NEC, d: u32, vals: []const u32) struct { success: bool, i: u32 } {
         for (vals, 0..) |val, index| {
             if ((d >= (val - self.tolerance)) and (d <= (val + self.tolerance))) {
-                return .{ .success = true, .i = index };
+                return .{ .success = true, .i = @truncate(index) };
             }
         }
         return .{ .success = false, .i = 0 };
