@@ -29,19 +29,20 @@ pub const NEC = struct {
             dst[i] = nec_frames[2][0];
         }
 
-        self.word(3, 18, msg.address, dst);
-        self.word(19, 34, ~msg.address, dst);
-        self.word(35, 50, msg.command, dst);
-        self.word(51, 66, ~msg.command, dst);
+        self.word(0, msg.address, dst);
+        self.word(1, ~msg.address, dst);
+        self.word(2, msg.command, dst);
+        self.word(3, ~msg.command, dst);
     }
 
-    fn word(_: *NEC, start: usize, end: usize, val: u32, dst: *[66]u32) void {
-        var j: u3 = 0;
-        var i = start;
+    fn word(_: *NEC, pos: usize, val: u32, dst: *[66]u32) void {
+        var shift: u3 = 0;
+        var i = 3 + (pos * 16);
+        const end = i + 16;
         while (i < end) : (i += 2) {
-            dst[i] = nec_frames[3][(val & (bit_mask << j)) >> j];
-            if (j < 7) {
-                j += 1;
+            dst[i] = nec_frames[3][(val & (bit_mask << shift)) >> shift];
+            if (shift < 7) {
+                shift += 1;
             }
         }
     }
