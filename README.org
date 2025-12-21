@@ -5,21 +5,21 @@ Process the IR signal by calculating the time, in milliseconds, between
 each rising/falling and falling/rising edge in the signal (pulses in the
 example below).  If put() returns true, then a full packet has been received.
 #+begin_src zig
-    var parser = ir.IR{};
-    for (pulses, 0..) |_, i| {
-    	if (parser.put(pulses[i])) {
+  var nec = ir.NEC{};
+  for (pulses, 0..) |_, i| {
+    	if (nec.put(pulses[i])) {
     		break;
     	}
-    }
-    const msg = try parser.value();
-    std.log.debug("address: 0x{x}, command: 0x{x}", .{msg.address, msg.command});
+  }
+  const msg = try nec.value();
+  std.log.debug("address: 0x{x}, command: 0x{x}", .{msg.address, msg.command});
 #+end_src
 
 Generate an IR signal:
 #+begin_src zig
-  var ir = NEC{ .tolerance = 0 };
+  var nec = ir.NEC{ .tolerance = 0 };
   var pulses: [66]u32 = undefined;
-  ir.get(message{ .address = 0x16, .command = 0x04 }, &pulses);
+  nec.get(message{ .address = 0x16, .command = 0x04 }, &pulses);
 #+end_src
 
 Now you should be able to iterate over the pulses and toggle an IR LED
