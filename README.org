@@ -1,7 +1,7 @@
 * IR
 IR is a library for parsing and generating NEC IR remote control signals.
 
-Process the IR signal by calculating the time, in milliseconds, between
+Process the IR signal by calculating the time, in microseconds, between
 each rising/falling and falling/rising edge in the signal (pulses in the
 example below).  If put() returns true, then a full packet has been received.
 #+begin_src zig
