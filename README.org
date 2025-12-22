@@ -15,12 +15,17 @@ example below).  If put() returns true, then a full packet has been received.
   std.log.debug("address: 0x{x}, command: 0x{x}", .{msg.address, msg.command});
 #+end_src
 
-Generate an IR signal:
+Generate an IR packet:
 #+begin_src zig
   var nec = ir.NEC{ .tolerance = 0 };
-  var pulses: [66]u32 = undefined;
-  nec.get(message{ .address = 0x16, .command = 0x04 }, &pulses);
+  var packet: [66]u32 = undefined;
+  nec.generate(message{ .address = 0x16, .command = 0x04 }, &pulses);
 #+end_src
 
-Now you should be able to iterate over the pulses and toggle an IR LED
-for the amount of time defined by the pulse (time in milliseconds).
+To use the packet in your project:
+#+begin_src zig
+  for (packet, 0..) |val| {
+      led.toggle();
+      time.sleep_us(val);
+  }
+#+end_src

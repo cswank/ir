@@ -20,7 +20,7 @@ pub const NEC = struct {
     bit: u5 = 0,
     i: u3 = 0,
 
-    pub fn get(self: *NEC, msg: message, dst: *[66]u32) void {
+    pub fn generate(self: *NEC, msg: message, dst: *[66]u32) void {
         dst[0] = nec_frames[0][0];
         dst[1] = nec_frames[1][0];
 
@@ -35,7 +35,7 @@ pub const NEC = struct {
         self.word(3, ~msg.command, dst);
     }
 
-    fn word(_: *NEC, pos: usize, val: u32, dst: *[66]u32) void {
+    fn word(_: *NEC, pos: usize, val: u8, dst: *[66]u32) void {
         var shift: u3 = 0;
         var i = 3 + (pos * 16);
         const end = i + 16;
@@ -117,13 +117,13 @@ test "put" {
     std.debug.assert(msg.command == 0x40);
 }
 
-test "get" {
+test "generate a packet" {
     var ir = NEC{ .tolerance = 0 };
-    var pulses: [66]u32 = undefined;
-    ir.get(message{ .address = 0x16, .command = 0x04 }, &pulses);
+    var packet: [66]u32 = undefined;
+    ir.generate(message{ .address = 0x16, .command = 0x04 }, &packet);
 
-    for (pulses, 0..) |_, i| {
-        if (ir.put(pulses[i])) {
+    for (packet, 0..) |_, i| {
+        if (ir.put(packet[i])) {
             break;
         }
     }
