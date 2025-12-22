@@ -25,7 +25,7 @@ Generate an IR packet:
 To use the packet in your project:
 #+begin_src zig
   for (packet, 0..) |val| {
-      led.toggle();
+      ir_led.toggle();
       time.sleep_us(val);
   }
 #+end_src
