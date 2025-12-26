@@ -39,8 +39,8 @@ pub fn main() !void {
     while (true) {
         slice.enable();
         pins.led.toggle();
-        for (packet, 0..) |duration, i| {
-            toggle = ((@as(u16, @truncate(i)) + 1) % 2);
+        for (packet) |duration| {
+            toggle = 1 - toggle;
             pins.gpio16.set_level((top / 2) * toggle);
             rptime.sleep_us(duration);
         }
