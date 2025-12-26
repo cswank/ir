@@ -17,7 +17,7 @@ example below).  If put() returns true, then a full packet has been received.
 
 Generate an IR packet:
 #+begin_src zig
-  var nec = ir.NEC{ .tolerance = 0 };
+  var nec = ir.NEC{};
   var packet: [66]u32 = undefined;
   nec.generate(message{ .address = 0x16, .command = 0x04 }, &pulses);
 #+end_src
