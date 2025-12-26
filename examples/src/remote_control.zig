@@ -35,15 +35,13 @@ pub fn main() !void {
     nec.generate(ir.message{ .address = 0x16, .command = 0x04 }, &packet);
 
     while (true) {
+        slice.enable();
         for (packet, 0..) |duration, i| {
-            if (i % 2 == 0) {
-                slice.enable();
-            } else {
-                slice.disable();
-            }
+            pins.gpio16.set_level((top / 2) * ((i + 1) % 2));
             rptime.sleep_us(duration);
         }
 
-        rptime.sleep_ms(2000);
+        slice.disable();
+        rptime.sleep_ms(5000);
     }
 }
