@@ -32,13 +32,13 @@
     // Once all dependencies are fetched, `zig build` no longer requires
     // internet connectivity.
     .dependencies = .{
-        .ir = .{
-            .url = "https://github.com/cswank/ir/archive/refs/tags/v1.0.1.tar.gz",
-            .hash = "ir-0.0.0-RNtv6UYhAAD_5pPh6mpAPh_GL98QjaEwdwsoI2K5Get3",
-        },
         .microzig = .{
             .url = "git+https://github.com/ZigEmbeddedGroup/microzig?ref=main#98daad1dd14c60ffce2e1afaea456c930692ffd7",
             .hash = "microzig-0.15.0-D20YSTG2zQCrfNxZUdfI5BiLsJFlikVyeLjKqDlv-2Q-",
+        },
+        .ir = .{
+            .url = "git+https://github.com/cswank/ir?ref=main#23e7cdf0750791eea68617d3ae4a10182e4057ca",
+            .hash = "ir-0.0.0-RNtv6UYhAABSAgF38XqLeAcIyrXreo_BNeqnP9DoJgrQ",
         },
     },
     .paths = .{
