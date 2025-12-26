@@ -35,7 +35,7 @@ pub const NEC = struct {
         self.word(3, ~msg.command, dst);
     }
 
-    fn word(_: *NEC, pos: usize, val: u8, dst: *[66]u32) void {
+    fn word(_: *NEC, pos: usize, val: u8, dst: *[67]u32) void {
         var shift: u3 = 0;
         var i = 3 + (pos * 16);
         const end = i + 16;
