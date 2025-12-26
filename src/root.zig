@@ -17,7 +17,7 @@ const nec_frames: []const []const u32 = &.{
 pub const NEC = struct {
     tolerance: u32 = 100,
     val: u32 = 0,
-    bit: u5 = 0,
+    bit: u6 = 0,
     i: u3 = 0,
 
     pub fn generate(self: *NEC, msg: message, dst: *[67]u32) void {
@@ -56,11 +56,13 @@ pub const NEC = struct {
         }
 
         if (self.i == 3) {
-            self.val |= (close.mask << self.bit);
-            if (self.bit == 31) {
-                return true;
-            }
+            self.val |= (close.mask << @truncate(self.bit));
             self.bit += 1;
+        }
+
+        // check for the final 563µs burst
+        if (self.i == 2 and self.bit == 32) {
+            return true;
         }
 
         self.i += 1;
@@ -119,7 +121,7 @@ test "put" {
 
 test "generate a packet" {
     var ir = NEC{ .tolerance = 0 };
-    var packet: [66]u32 = undefined;
+    var packet: [67]u32 = undefined;
     ir.generate(message{ .address = 0x16, .command = 0x04 }, &packet);
 
     for (packet, 0..) |_, i| {
