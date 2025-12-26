@@ -8,6 +8,7 @@ const pwm = rp2040.pwm;
 
 const pin_config = rp2040.pins.GlobalConfiguration{
     .GPIO16 = .{ .name = "gpio16", .function = .PWM0_A },
+    .GPIO25 = .{ .name = "led", .direction = .out },
 };
 
 const pins = pin_config.pins();
@@ -30,14 +31,17 @@ pub fn main() !void {
     slice.set_wrap(top);
     pins.gpio16.set_level(top / 2); // 50% duty cycle
 
-    var packet: [66]u32 = undefined;
+    var packet: [67]u32 = undefined;
     var nec = ir.NEC{};
-    nec.generate(ir.message{ .address = 0x16, .command = 0x04 }, &packet);
+    nec.generate(ir.message{ .address = 0x04, .command = 0x08 }, &packet);
 
+    var toggle: u16 = 0;
     while (true) {
         slice.enable();
+        pins.led.toggle();
         for (packet, 0..) |duration, i| {
-            pins.gpio16.set_level((top / 2) * ((i + 1) % 2));
+            toggle = ((@as(u16, @truncate(i)) + 1) % 2);
+            pins.gpio16.set_level((top / 2) * toggle);
             rptime.sleep_us(duration);
         }
 

@@ -20,12 +20,12 @@ pub const NEC = struct {
     bit: u5 = 0,
     i: u3 = 0,
 
-    pub fn generate(self: *NEC, msg: message, dst: *[66]u32) void {
+    pub fn generate(self: *NEC, msg: message, dst: *[67]u32) void {
         dst[0] = nec_frames[0][0];
         dst[1] = nec_frames[1][0];
 
         var i: usize = 2;
-        while (i < 66) : (i += 2) {
+        while (i < 67) : (i += 2) {
             dst[i] = nec_frames[2][0];
         }
 

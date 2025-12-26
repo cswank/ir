@@ -26,4 +26,18 @@ pub fn build(b: *std.Build) void {
     );
 
     mb.install_firmware(remote_control, .{});
+
+    const reader = mb.add_firmware(
+        .{
+            .name = "reader",
+            .target = target,
+            .optimize = optimize,
+            .root_source_file = b.path("src/reader.zig"),
+            .imports = &.{
+                .{ .name = "ir", .module = ir_dep.module("ir") },
+            },
+        },
+    );
+
+    mb.install_firmware(reader, .{});
 }
