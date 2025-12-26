@@ -37,7 +37,7 @@
             .hash = "microzig-0.15.0-D20YSTG2zQCrfNxZUdfI5BiLsJFlikVyeLjKqDlv-2Q-",
         },
         .ir = .{
-            .url = "git+https://github.com/cswank/ir?ref=main#23e7cdf0750791eea68617d3ae4a10182e4057ca",
+            .url = "https://github.com/cswank/ir/archive/refs/tags/v1.0.2.tar.gz",
             .hash = "ir-0.0.0-RNtv6UYhAABSAgF38XqLeAcIyrXreo_BNeqnP9DoJgrQ",
         },
     },
