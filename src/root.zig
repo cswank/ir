@@ -55,14 +55,14 @@ pub const NEC = struct {
             return false;
         }
 
+        if (self.i == 2 and self.bit == 32) {
+            // the final 563µs burst has been received
+            return true;
+        }
+
         if (self.i == 3) {
             self.val |= (close.mask << @truncate(self.bit));
             self.bit += 1;
-        }
-
-        // check for the final 563µs burst
-        if (self.i == 2 and self.bit == 32) {
-            return true;
         }
 
         self.i += 1;

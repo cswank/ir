@@ -2,16 +2,16 @@ const std = @import("std");
 const microzig = @import("microzig");
 const ir = @import("ir");
 const rp2040 = microzig.hal;
-const rptime = rp2040.time;
-const gpio = rp2040.gpio;
-const pwm = rp2040.pwm;
+const time = rp2040.time;
 
 const pin_config = rp2040.pins.GlobalConfiguration{
-    .GPIO16 = .{ .name = "gpio16", .function = .PWM0_A },
+    .GPIO16 = .{ .name = "pwm", .function = .PWM0_A },
     .GPIO25 = .{ .name = "led", .direction = .out },
 };
 
 const pins = pin_config.pins();
+const led = pins.led;
+const pwm = pins.pwm;
 
 pub fn main() !void {
     pin_config.apply();
@@ -22,14 +22,11 @@ pub fn main() !void {
     // For 38kHz: 125000000 / 38000 ≈ 3289.47
     // Using DIV=1.0, WRAP=3288 gives ~38.02kHz
 
-    const div_int: u8 = 1;
-    const div_frac: u8 = 0;
     const top: u16 = 3288;
-
-    const slice = pins.gpio16.slice();
-    slice.set_clk_div(div_int, div_frac);
+    const slice = pwm.slice();
+    slice.set_clk_div(1, 0);
     slice.set_wrap(top);
-    pins.gpio16.set_level(top / 2); // 50% duty cycle
+    pwm.set_level(top / 2); // 50% duty cycle
 
     var packet: [67]u32 = undefined;
     var nec = ir.NEC{};
@@ -38,14 +35,15 @@ pub fn main() !void {
     var toggle: u16 = 0;
     while (true) {
         slice.enable();
-        pins.led.toggle();
+        led.toggle();
+        toggle = 0;
         for (packet) |duration| {
             toggle = 1 - toggle;
-            pins.gpio16.set_level((top / 2) * toggle);
-            rptime.sleep_us(duration);
+            pwm.set_level((top / 2) * toggle);
+            time.sleep_us(duration);
         }
 
         slice.disable();
-        rptime.sleep_ms(5000);
+        time.sleep_ms(5000);
     }
 }
