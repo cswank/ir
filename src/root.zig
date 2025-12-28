@@ -49,7 +49,6 @@ pub const NEC = struct {
 
     pub fn put(self: *NEC, duration: u64) bool {
         const close = self.closeTo(@truncate(duration), nec_frames[self.i]);
-
         if (!close.success) {
             self.reset();
             return false;
@@ -87,12 +86,6 @@ pub const NEC = struct {
         return message{ .address = addr, .command = cmd };
     }
 
-    fn reset(self: *NEC) void {
-        self.val = 0;
-        self.bit = 0;
-        self.i = 0;
-    }
-
     fn closeTo(self: *NEC, d: u32, vals: []const u32) struct { success: bool, mask: u32 } {
         for (vals, 0..) |val, index| {
             if ((d >= (val - self.tolerance)) and (d <= (val + self.tolerance))) {
@@ -100,6 +93,12 @@ pub const NEC = struct {
             }
         }
         return .{ .success = false, .mask = 0 };
+    }
+
+    fn reset(self: *NEC) void {
+        self.val = 0;
+        self.bit = 0;
+        self.i = 0;
     }
 };
 
