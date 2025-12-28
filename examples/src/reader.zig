@@ -42,7 +42,7 @@ fn callback() linksection(".ram_text") callconv(.c) void {
 
 fn checkIR() void {
     if (parser.value()) |msg| {
-        std.log.debug("addr: {x:0>2}}, cmd: {x:0>2}}", .{ msg.address, msg.command });
+        std.log.debug("addr: {x:0>2}, cmd: {x:0>2}", .{ msg.address, msg.command });
         led.toggle();
     } else |_| {
         blink(5);
