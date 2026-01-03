@@ -60,14 +60,14 @@ pub fn main() !void {
     init();
     t1 = rptime.get_time_since_boot();
     while (true) {
-        rptime.sleep_ms(2_000);
+        rptime.sleep_ms(10_000);
     }
 }
 
 fn init() void {
     ir_input.set_function(.sio);
     ir_input.set_direction(.in);
-    ir_input.set_pull(.down);
+    ir_input.set_pull(.up);
     ir_input.set_irq_enabled(gpio.IrqEvents{ .fall = 1, .rise = 1 }, true);
 
     microzig.interrupt.enable(.IO_IRQ_BANK0);
